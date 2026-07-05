@@ -44,15 +44,29 @@ export default async function handler(req, res) {
       });
     }
 
-    const maxTry = Math.min(json.images_results.length, 30);
+    const maxTry = Math.min(json.images_results.length, 10);
 
-    for (let i = 0; i < maxTry; i++) {
+const randomIndex = Math.floor(Math.random() * maxTry);
 
-      const img = json.images_results[i];
+const order = [];
 
-      if (!img.original) continue;
+// Ảnh ngẫu nhiên đầu tiên
+order.push(randomIndex);
 
-      try {
+// Sau đó thử các ảnh còn lại
+for (let i = 0; i < maxTry; i++) {
+  if (i !== randomIndex) {
+    order.push(i);
+  }
+}
+
+for (const index of order) {
+
+  const img = json.images_results[index];
+
+  if (!img.original) continue;
+
+  try {
 
         const controller = new AbortController();
 
