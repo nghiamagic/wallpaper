@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const maxTry = Math.min(json.images_results.length, 10);
+    const maxTry = Math.min(json.images_results.length, 7);
 
 const randomIndex = Math.floor(Math.random() * maxTry);
 
@@ -72,7 +72,7 @@ for (const index of order) {
 
         const timeout = setTimeout(() => {
           controller.abort();
-        }, 5000);
+        }, 2000);
 
         const image = await fetch(img.original, {
           headers: {
