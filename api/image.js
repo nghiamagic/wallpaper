@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const serpUrl =
       "https://serpapi.com/search.json?" +
       "engine=google_images" +
-      "&q=" + encodeURIComponent(keyword + " wallpaper 4k iphone") +
+      "&q=" + encodeURIComponent(keyword) +
       "&location=Vietnam" +
       "&google_domain=google.com.vn" +
       "&hl=vi" +
