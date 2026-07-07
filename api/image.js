@@ -39,87 +39,64 @@ export default async function handler(req, res) {
     }
 
     const json = await serp.json();
-json.images_results = (json.images_results || []).slice(0, 10);
+json.images_results = (json.images_results || []).slice(0, 5);
     if (!json.images_results || json.images_results.length === 0) {
       return res.status(404).json({
         error: "No image found"
       });
     }
 
-    // Lấy tối đa 10 ảnh rồi trộn ngẫu nhiên
-const images = [...json.images_results]
-  .sort(() => Math.random() - 0.5)
-  .slice(0, 5);
+   // Chỉ thử tối đa 5 ảnh đầu
+const maxTry = Math.min(json.images_results.length, 5);
 
-function fetchImage(img) {
-  return new Promise(async (resolve) => {
+for (let i = 0; i < maxTry; i++) {
 
-    if (!img.original) {
-      return resolve(null);
-    }
+  const img = json.images_results[i];
 
-    try {
+  if (!img.original) continue;
 
-      const controller = new AbortController();
+  try {
 
-      const timeout = setTimeout(() => {
-        controller.abort();
-      }, 2000);
+    const controller = new AbortController();
 
-      const image = await fetch(img.original, {
-        headers: {
-          "User-Agent": "Mozilla/5.0"
-        },
-        signal: controller.signal
-      });
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 1500);
 
-      clearTimeout(timeout);
+    const image = await fetch(img.original, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      },
+      signal: controller.signal
+    });
 
-      if (!image.ok) {
-        return resolve(null);
-      }
+    clearTimeout(timeout);
 
-      const type = image.headers.get("content-type") || "";
+    if (!image.ok) continue;
 
-      if (!type.startsWith("image/")) {
-        return resolve(null);
-      }
+    const type = image.headers.get("content-type") || "";
 
-      const buffer = Buffer.from(await image.arrayBuffer());
+    if (!type.startsWith("image/")) continue;
 
-      resolve({
-        buffer,
-        type
-      });
+    const buffer = Buffer.from(await image.arrayBuffer());
 
-    } catch {
+    res.setHeader("Content-Type", type);
+    res.setHeader("Cache-Control", "no-store");
 
-      resolve(null);
+    return res.send(buffer);
 
-    }
+  } catch (e) {
 
-  });
-}
+    // Nếu lỗi thì thử ảnh tiếp theo
+    continue;
 
-const result = await Promise.any(
-  images.map(img => fetchImage(img).then(r => {
-    if (!r) throw new Error();
-    return r;
-  }))
-).catch(() => null);
-
-if (!result) {
-
-  return res.status(404).json({
-    error: "No downloadable image found"
-  });
+  }
 
 }
 
-res.setHeader("Content-Type", result.type);
-res.setHeader("Cache-Control", "no-store");
-
-return res.send(result.buffer);
+return res.status(404).json({
+  error: "No downloadable image found"
+});
 
   } catch (err) {
 
