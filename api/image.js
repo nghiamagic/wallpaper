@@ -24,10 +24,7 @@ export default async function handler(req, res) {
       "&q=" + encodeURIComponent(keyword) +
       "&location=Vietnam" +
       "&google_domain=google.com.vn" +
-      "&num=10" +
 "&ijn=0" +
-      "&hl=vi" +
-      "&gl=vn" +
       "&api_key=" + apiKey;
 
     const serp = await fetch(serpUrl);
